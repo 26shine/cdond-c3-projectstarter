@@ -38,6 +38,7 @@ commands:
     steps:
       - slack/notify:
           event: fail
+          channel: circleci-alerts
           custom: |
             {
               "blocks": [
