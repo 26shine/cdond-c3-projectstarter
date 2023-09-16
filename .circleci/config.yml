@@ -36,12 +36,30 @@ commands:
 
   slack-notification:
     steps:
-      - run:
-          name: Send Slack Notification
-          when: on_fail
-          command: |
-            MESSAGE="CircleCI run failed for branch: $CIRCLE_BRANCH\nJob Name: $CIRCLE_JOB\nURL: $CIRCLE_BUILD_URL"
-            curl -kX POST -H 'Content-type: application/json' --data '{"text":"'"$MESSAGE"'"}' "$SLACK_WEBHOOK_URL"
+      - slack/notify:
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "CircleCI run failed for branch: $CIRCLE_BRANCH"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Job Name: $CIRCLE_JOB"
+                    },
+                                        {
+                      "type": "mrkdwn",
+                      "text": "Job URL: $CIRCLE_BUILD_URL"
+                    },
+                  ]
+                }
+              ]
+            }
+          event: fail
 
 jobs:
   build-frontend:
@@ -321,16 +339,22 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
-      - build-backend
+      - build-frontend:
+          context: slack-alerts
+      - build-backend:
+          context: slack-alerts
       - test-frontend:
           requires: [build-frontend]
+          context: slack-alerts
       - test-backend:
           requires: [build-backend]
+          context: slack-alerts
       - scan-backend:
           requires: [build-backend]
+          context: slack-alerts
       - scan-frontend:
           requires: [build-frontend]
+          context: slack-alerts
       # - deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
