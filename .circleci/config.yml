@@ -40,24 +40,24 @@ commands:
           name: Send Slack Notification
           when: on_fail
           command: |
-            MESSAGE="\nBranch: $CIRCLE_BRANCH\nJob Name: $CIRCLE_JOB\nJob URL: $CIRCLE_BUILD_URL"
-            curl -kX POST -H 'Content-type: application/json' --data 
-            '{
+            MESSAGE="Branch: $CIRCLE_BRANCH\nJob Name: $CIRCLE_JOB\nJob URL: $CIRCLE_BUILD_URL"
+            JSON_PAYLOAD='{
               "attachments":[
-                  {
-                    "fallback":"CircleCI Notification",
-                    "color":"#D00000",
-                    "fields":[
-                        {
-                          "title":"CircleCI Run Failed",
-                          "value":"'"$MESSAGE"'",
-                          "short":false
-                        }
-                    ]
-                  }
+                {
+                  "fallback":"CircleCI Notification",
+                  "color":"#D00000",
+                  "fields":[
+                    {
+                      "title":"CircleCI Run Failed",
+                      "value":"'"$MESSAGE"'",
+                      "short":false
+                    }
+                  ]
+                }
               ]
-            }' 
-            "$SLACK_WEBHOOK_URL"
+            }'
+            curl -kX POST -H 'Content-type: application/json' --data "$JSON_PAYLOAD" "$SLACK_WEBHOOK_URL"
+
 
 jobs:
   build-frontend:
