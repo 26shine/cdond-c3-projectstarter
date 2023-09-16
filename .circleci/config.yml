@@ -16,45 +16,32 @@ commands:
             exit 1
 
   revert-migrations:
-    # description: Revert the last migration if successfully run in the current workflow.
-    # parameters:
-    #   # Add parameter here
-    # steps:
-    #   - run:
-    #       name: Revert migrations
-    #       # Add when this will run
-    #       command: |
-    #         # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-    #         SUCCESS = 1
-    #         if(( $SUCCESS==1 )); 
-    #         then
-    #         #  cd ~/project/backend
-    #         #  npm install
-    #         #  Add revert code here. You can find this in the Getting Started section.
-    #           exit 1
-    #         fi
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      # Add parameter here
+    steps:
+      - run:
+          name: Revert migrations
+          # Add when this will run
+          command: |
+            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS = 1
+            if(( $SUCCESS==1 )); 
+            then
+            #  cd ~/project/backend
+            #  npm install
+            #  Add revert code here. You can find this in the Getting Started section.
+              exit 1
+            fi
 
   slack-notification:
     steps:
-      - slack/notify:
-          event: fail
-          channel: circleci-alerts
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "*CircleCI Run Failed* :x",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-
+      - run:
+          name: Send Slack Notification
+          when: on_fail
+          command: |
+            MESSAGE="CircleCI run failed for branch: $CIRCLE_BRANCH\nJob Name: $CIRCLE_JOB\nURL: $CIRCLE_BUILD_URL"
+            curl -kX POST -H 'Content-type: application/json' --data '{"text":"'"$MESSAGE"'"}' "$SLACK_WEBHOOK_URL"
 
 jobs:
   build-frontend:
@@ -142,6 +129,7 @@ jobs:
             cd frontend
             npm install
             npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-scan
@@ -333,22 +321,16 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend:
-          context: slack-alerts
-      - build-backend:
-          context: slack-alerts
+      - build-frontend
+      - build-backend
       - test-frontend:
           requires: [build-frontend]
-          context: slack-alerts
       - test-backend:
           requires: [build-backend]
-          context: slack-alerts
       - scan-backend:
           requires: [build-backend]
-          context: slack-alerts
       - scan-frontend:
           requires: [build-frontend]
-          context: slack-alerts
       # - deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
