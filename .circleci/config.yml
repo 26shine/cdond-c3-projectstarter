@@ -34,6 +34,15 @@ commands:
               exit 1
             fi
 
+  slack-notification:
+    steps:
+      - run:
+          name: Send Slack Notification
+          when: on_fail
+          command: |
+            MESSAGE="CircleCI build failed for branch: $BRANCH_NAME\nJob Name: $JOB_NAME\nBuild URL: $BUILD_URL"
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"'"$MESSAGE"'"}' "$SLACK_WEBHOOK_URL"
+
 jobs:
   build-frontend:
     docker:
@@ -51,6 +60,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+      - slack-notification
 
   build-backend:
     docker:
@@ -68,6 +78,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack-notification
 
   test-frontend:
     docker:
@@ -85,6 +96,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-test
+      - slack-notification
 
   test-backend:
     docker:
@@ -102,6 +114,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-test
+      - slack-notification
 
   scan-frontend:
     docker:
@@ -120,6 +133,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-scan
+      - slack-notification
 
   scan-backend:
     docker:
@@ -138,6 +152,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-scan
+      - slack-notification
 
 #   deploy-infrastructure:
 #     docker:
@@ -304,27 +319,6 @@ jobs:
 #             # your code here
 #           fi
 
-  slack-notification:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - slack/notify:
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*CI/CD Pipeline Failure* :warning:",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: fail
 workflows:
   default:
     jobs:
@@ -338,12 +332,6 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
-      - slack-notification:
-          context: slack-alerts
-          requires: [build-frontend]
-      - slack-notification:
-          context: slack-alerts
-          requires: [build-backend]
       # - deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
