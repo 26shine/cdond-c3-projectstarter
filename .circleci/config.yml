@@ -40,8 +40,8 @@ commands:
           name: Send Slack Notification
           when: on_fail
           command: |
-            MESSAGE="CircleCI build failed for branch: $BRANCH_NAME\nJob Name: $JOB_NAME\nBuild URL: $BUILD_URL"
-            curl -X POST -H 'Content-type: application/json' --data '{"text":"'"$MESSAGE"'"}' "$SLACK_WEBHOOK_URL"
+            MESSAGE="CircleCI run failed for branch: $BRANCH_NAME\nJob Name: $JOB_NAME\nURL: $BUILD_URL"
+            curl -kX POST -H 'Content-type: application/json' --data '{"text":"'"$MESSAGE"'"}' "$SLACK_WEBHOOK_URL"
 
 jobs:
   build-frontend:
