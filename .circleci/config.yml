@@ -46,21 +46,10 @@ commands:
                   "type": "section",
                   "fields": [
                     {
-                      "type": "mrkdwn",
-                      "text": "*CircleCI Run Failed* :x:"
+                      "type": "plain_text",
+                      "text": "*CircleCI Run Failed* :x:",
+                      "emoji": true
                     },
-                    {
-                      "type": "mrkdwn",
-                      "text": "Branch: $CIRCLE_BRANCH"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "Job Name: $CIRCLE_JOB"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "Job URL: <$CIRCLE_BUILD_URL|View Job>"
-                    }
                   ]
                 }
               ]
