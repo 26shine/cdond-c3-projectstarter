@@ -104,7 +104,17 @@ commands:
               --stack-name "<<parameters.stack-name>>-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=<<parameters.tags>>
-              --region us-east-1
+
+  cloudformation-destroy:
+    parameters:
+      stack-name:
+        type: string
+    steps:
+      - run:
+          name: Cloudformation destroy
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name "<<parameters.stack-name>>-${CIRCLE_WORKFLOW_ID:0:7}"
 
 jobs:
   build-frontend:
@@ -246,7 +256,10 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment
+      - cloudformation-deploy:
+          stack-name: udapeople-backend
+      - cloudformation-deploy:
+          stack-name: udapeople-frontend
 
   configure-infrastructure:
     docker:
