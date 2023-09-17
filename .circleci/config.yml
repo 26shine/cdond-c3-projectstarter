@@ -86,17 +86,6 @@ commands:
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible
 
-  aws-configure:
-    description: Set up AWS credentials
-    steps:
-      - run:
-          name: Configure AWS CLI
-          command: |
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-            aws configure set default.region $AWS_DEFAULT_REGION
-            aws configure set aws_session_token $AWS_SESSION_TOKEN
-
   cloudformation-deploy:
     parameters:
       template-file:
@@ -231,7 +220,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - aws-configure
       - run:
           name: Install dependencies
           command: |
