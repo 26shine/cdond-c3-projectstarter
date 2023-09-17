@@ -114,7 +114,7 @@ commands:
               --template-file .circleci/files/<<parameters.template-file>> \
               --stack-name "<<parameters.stack-name>>-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=<<parameters.udapeople>>
+              --tags project=<<parameters.tags>>
               --region $AWS_REGION
 
 jobs:
