@@ -86,6 +86,37 @@ commands:
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible
 
+  aws-configure:
+    description: Set up AWS credentials
+    steps:
+      - run:
+          name: Configure AWS CLI
+          command: |
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set default.region $AWS_DEFAULT_REGION
+            aws configure set aws_session_token $AWS_SESSION_TOKEN
+
+  cloudformation-deploy:
+    parameters:
+      template-file:
+        type: string
+      stack-name:
+        type: string
+      tags: 
+        type: string
+        default: udapeople
+    steps:
+      - run:
+          name: Deploy Cloudformation
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/<<parameters.template-file>> \
+              --stack-name "<<parameters.stack-name>>-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=<<parameters.udapeople>>
+              --region $AWS_REGION
+
 jobs:
   build-frontend:
     docker:
@@ -200,28 +231,19 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - aws-configure
       - run:
           name: Install dependencies
           command: |
             yum install -y tar gzip
-      - run:
-          name: Ensure back-end infrastructure exists
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople
-              --region $AWS_REGION
-      - run:
-          name: Ensure front-end infrastructure exist
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople \
-              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}  
-              --region $AWS_REGION
+      # Create stack BE
+      - cloudformation-deploy:
+          template-file: "backend.yml"
+          stack-name: "udapeople-backend"
+      # Create stack FE
+      - cloudformation-deploy:
+          template-file: "frontend.yml"
+          stack-name: "udapeople-frontend"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
