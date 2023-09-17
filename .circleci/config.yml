@@ -279,7 +279,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - install_awscli
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
@@ -447,9 +446,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - install_nodejs
-      - install_awscli
-
       - run:
           name: Get old workflow id, remove old stacks and files
           command: |
