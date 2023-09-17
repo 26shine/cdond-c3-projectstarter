@@ -256,9 +256,9 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - cloudformation-deploy:
+      - cloudformation-destroy:
           stack-name: udapeople-backend
-      - cloudformation-deploy:
+      - cloudformation-destroy:
           stack-name: udapeople-frontend
 
   configure-infrastructure:
