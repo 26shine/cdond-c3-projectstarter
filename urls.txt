@@ -1,0 +1,2 @@
+repo: https://github.com/26shine/cdond-c3-projectstarter
+s3: http://udapeople-ab56b42.s3-website-us-east-1.amazonaws.com/#/employees
