@@ -29,22 +29,13 @@ commands:
         default: "https://kvdb.io/$KVDB_BUCKET_ID/migration_${CIRCLE_WORKFLOW_ID:0:7}"
     steps:
       - run:
-          name: Installing aws-cli
-          when: on_fail
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-      - run:
           name: Revert migrations
           when: on_fail
           command: |
-            echo "Reverting migrations: ${CIRCLE_WORKFLOW_ID:0:7}"
             set -e
-            
             # Use the migration status URL parameter
             MIGRATION_STATUS_URL="${migration-status-url}"
-            
+            echo "Reverting migrations: $MIGRATION_STATUS_URL"
             # Check if the migration was successful
             SUCCESS=$(curl --insecure "$MIGRATION_STATUS_URL")
             
