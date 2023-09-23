@@ -16,21 +16,13 @@ commands:
 
   revert-migrations:
     description: Revert the last migration if the workflow fails.
-    parameters:
-      migration-status-url:
-        type: string
-        default: "https://kvdb.io/$KVDB_BUCKET_ID/migration_${CIRCLE_WORKFLOW_ID:0:7}"
     steps:
       - run:
           name: Revert migrations
           when: on_fail
           command: |
-            set -e
-            # Use the migration status URL parameter
-            MIGRATION_STATUS_URL="${migration-status-url}"
-            echo "Reverting migrations: $MIGRATION_STATUS_URL"
             # Check if the migration was successful
-            SUCCESS=$(curl --insecure "$MIGRATION_STATUS_URL")
+            SUCCESS=$(curl --insecure https://kvdb.io/$KVDB_BUCKET_ID/migration_${CIRCLE_WORKFLOW_ID:0:7})
             
             if [ "$SUCCESS" == "1" ]; then
               cd backend
